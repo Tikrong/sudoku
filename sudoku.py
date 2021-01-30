@@ -129,6 +129,7 @@ class SudokuSolver():
                 if len(self.domains[var]) < values_in_domain:
                     unassigned_var = var
                     values_in_domain = len(self.domains[var])
+                
 
         return unassigned_var
 
@@ -194,7 +195,7 @@ class SudokuSolver():
             self.domains = copy.deepcopy(tmp_domain)
         return None
 
-
+"""
 sudoku = Sudoku("structure0.txt")
 solver = SudokuSolver(sudoku)
 solver.print(solver.sudoku.initial_assignment)
@@ -207,7 +208,7 @@ else:
     solver.print(assignment)
 
 print(solver.counter)
-
+"""
 
 
 
