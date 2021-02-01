@@ -98,6 +98,7 @@ while running:
             else:
                 status = "SOLVED"
                 solution = solver.grid(assignment)
+                print(solver.counter)
 
 
     # update everything on the screen

@@ -234,7 +234,7 @@ class SudokuSolver():
         """
 
      
-
+     
         for y in range(9):
             for x in range(9):
                 if assignment[y][x] != False:
