@@ -1,4 +1,5 @@
 import copy
+import time
 
 class Variable():
     """ create new variable with coordinates """
@@ -37,16 +38,20 @@ class Sudoku():
 
             #You may add a check that provided structure is correct
 
+            # now it is initial assignment
             self.structure = []
             for y in range(self.height):
                 row = []
                 for x in range(self.width):
                     if contents[y][x].isdigit():
-                        row.append(contents[y][x])
+                        row.append(int(contents[y][x]))
                     else:
                         row.append(False)
                 self.structure.append(row)
+            print(self.structure)
+  
 
+        """
         # determine variables set
         self.variables = set()
         for y in range(self.height):
@@ -58,7 +63,8 @@ class Sudoku():
         for variable in self.variables:
             if self.structure[variable.y][variable.x]:
                 self.initial_assignment[variable] = int(self.structure[variable.y][variable.x])
-
+        """
+    """
     #return set of all variables that are constraining current variable (hirizontal and vertical row)
     def neighbors(self, var):
         neighbors = set()
@@ -71,6 +77,24 @@ class Sudoku():
                 neighbors.add(variable)
 
         return neighbors
+    """
+    # def new neighbor class that uses structure in a list and returns tuples with coordinates
+    def neighbors(self, y, x):
+        neighbors = set()
+        # add vertical and horizontal neighbors
+        for k in range(9):
+            neighbors.add((y, k))
+            neighbors.add((k, x))
+        #add neighbors from the square
+        for k in range(9):
+            for j in range(9):
+                if (y // 3 == k // 3) and (j // 3 == x // 3):
+                    neighbors.add((k, j))
+        neighbors.remove((y,x))
+        
+        return neighbors
+
+
 
 class SudokuSolver():
 
@@ -79,9 +103,21 @@ class SudokuSolver():
     def __init__(self, sudoku):
         self.sudoku = sudoku
 
+        """
         #initialize domains for all variables
         values = set(i for i in range(1,10))
         self.domains = {var : values.copy() for var in self.sudoku.variables}
+        """
+        # initialize domains with list
+        values = set(i for i in range(1,10))
+        self.domains = []
+        for y in range(9):
+            row = []
+            for x in range(9):
+                row.append(values.copy())
+            self.domains.append(row)
+            
+                
 
     #return 2D array representing current assignment
     def grid(self, assignment):
@@ -90,11 +126,13 @@ class SudokuSolver():
             [None for _ in range(self.sudoku.width)]
             for _ in range(self.sudoku.height)
         ]
-
+        """
         for var, value in assignment.items():
             grid[var.y][var.x] = value
 
         return grid
+        """
+        return assignment
 
     # print current assignment to the terminal
     def print(self, assignment):
@@ -106,12 +144,26 @@ class SudokuSolver():
 
     def solve(self):
     # Enforce node and arc consistency, and then solve the CSP.
-        self.ac3(self.sudoku.initial_assignment)
-        return self.backtrack(self.sudoku.initial_assignment)
+        self.ac3(self.sudoku.structure)
+        return self.backtrack(self.sudoku.structure)
 
     # check that assignment is consistent: no same numbers in horizontal and vertical rows
     def consistent(self, assignment):
 
+        for y in range(9):
+            for x in range(9):
+                neighbors = self.sudoku.neighbors(y, x)
+                for neighbor in neighbors:
+                    k, j = neighbor
+                    if y == k and x == j:
+                        continue
+
+                    if assignment[y][x] != False:
+                        if assignment[y][x] == assignment[k][j]:
+                            return False
+        return True
+
+        """
         for variable in assignment:
             neighbors = self.sudoku.neighbors(variable)
             for neighbor in neighbors:
@@ -119,16 +171,26 @@ class SudokuSolver():
                     if assignment[variable] == assignment[neighbor]:
                         return False
         return True
+        """
 
     # return unassigned variable
     def select_unassigned_var(self, assignment):
         values_in_domain = 10
 
+        for y in range(9):
+            for x in range(9):
+                if assignment[y][x] == False:
+                    if len(self.domains[y][x]) < values_in_domain:
+                        unassigned_var = (y, x)
+                        values_in_domain = len(self.domains[y][x])
+
+        """
         for var in self.sudoku.variables:
             if var not in assignment:
                 if len(self.domains[var]) < values_in_domain:
                     unassigned_var = var
                     values_in_domain = len(self.domains[var])
+        """
                 
 
         return unassigned_var
@@ -137,19 +199,26 @@ class SudokuSolver():
     def assignment_complete(self, assignment):
         if not assignment:
             return False
-
+        """
         if len(assignment) != len(self.sudoku.variables):
-            return False
-
+         return False
+        
         for key in assignment:
             if assignment[key] == None:
                 return False
+
+        """
+        for y in range(9):
+            for x in range(9):
+                if assignment[y][x] == False:
+                    return False
 
         return True
 
     # some heuristic to remove values from domain that are not in line with current assignment
     def ac3(self, assignment, var = None):
 
+        """
         # if algorithm initialized for the first time with only initial data
         if not var:
             for variable_x in self.sudoku.variables:
@@ -162,6 +231,25 @@ class SudokuSolver():
                         if value == assignment[variable_y]:
                             self.domains[variable_x].remove(value)
         return True
+        """
+
+     
+
+        for y in range(9):
+            for x in range(9):
+                if assignment[y][x] != False:
+                    continue
+                neighbors = self.sudoku.neighbors(y, x)
+                for k,j in neighbors:
+                    if assignment[k][j] == False:
+                        continue
+                    for value in self.domains[y][x].copy():
+                        if value == assignment[k][j]:
+                            self.domains[y][x].remove(value)
+                              
+        return True
+
+
 
 
     def backtrack(self, assignment):
@@ -179,12 +267,18 @@ class SudokuSolver():
 
         #try new variable
         var = self.select_unassigned_var(assignment)
+        
 
-        for value in self.domains[var]:
+        y, x = var
+
+
+        for value in self.domains[y][x]:
+    
             self.counter += 1
 
-            new_assignment = assignment.copy()
-            new_assignment[var] = value
+            new_assignment = copy.deepcopy(assignment)
+            new_assignment[y][x] = value
+
             tmp_domain = copy.deepcopy(self.domains)
             self.ac3(new_assignment)
 
@@ -193,6 +287,7 @@ class SudokuSolver():
                 if result is not None:
                     return result
             self.domains = copy.deepcopy(tmp_domain)
+
         return None
 
 """

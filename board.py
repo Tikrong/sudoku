@@ -14,8 +14,8 @@ RED = (255,0,0)
 numbers_font = pygame.font.SysFont('verdana', 24)
 
 #screen size
-screen_height = 800
-screen_width = 800
+screen_height = 600
+screen_width = 450
 
 # sizes
 tile_size = 50
@@ -25,9 +25,9 @@ screen = pygame.display.set_mode((screen_width, screen_height))
 #load sudoku assignment
 sudoku = Sudoku("structure0.txt")
 solver = SudokuSolver(sudoku)
-initial_state = solver.grid(solver.sudoku.initial_assignment)
+initial_state = solver.grid(solver.sudoku.structure)
 
-solution = solver.grid(solver.sudoku.initial_assignment)
+solution = solver.grid(solver.sudoku.structure)
 status = ""
 
 running = True
