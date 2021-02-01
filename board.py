@@ -14,8 +14,8 @@ RED = (255,0,0)
 numbers_font = pygame.font.SysFont('verdana', 24)
 
 #screen size
-screen_height = 800
-screen_width = 800
+screen_height = 600
+screen_width = 450
 
 # sizes
 tile_size = 50
