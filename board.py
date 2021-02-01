@@ -1,3 +1,7 @@
+"""
+high level support for doing this and that.
+"""
+
 import pygame
 
 from sudoku import *

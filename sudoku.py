@@ -1,3 +1,7 @@
+"""
+high level support for doing this and that.
+"""
+
 import copy
 
 class Variable():
@@ -6,51 +10,53 @@ class Variable():
         self.x = x
         self.y = y
 
-    """ define hashing of variable to use it as key in dicts and store them in sets"""
+    # define hashing of variable to use it as key in dicts and store them in sets
     def __hash__(self):
         return hash((self.x, self.y))
 
-    """ define a way to determine whether to variables are equal"""
+    # define a way to determine whether to variables are equal
     def __eq__(self, other):
-        return (
-                (self.x == other.x) and
-                (self.y == other.y)
-                )
+        return ((self.x == other.x) and (self.y == other.y))
 
-    """ define string representation of class """
+    # define string representation of class
     def __str__(self):
         return f"({self.y}, {self.x})"
-
 
     def __repr__(self):
         return f"Variable({self.y}, {self.x})"
 
 
 class Sudoku():
-    """ define structure of a crossword """
+    """ define structure of a Sudoku puzzle """
     def __init__(self, structure_file):
 
         with open(structure_file) as f:
             contents = f.read().splitlines()
-            self.height = len(contents)
-            self.width = self.height
-
-            #You may add a check that provided structure is correct
-
+            
+            #check that provided puzzle is correct (9x9 field)
+            if len(contents) != 9:
+                raise Exception("Not valid sudoku puzzle")
+            for row in contents:
+                if len(row) != 9:
+                    raise Exception("Not valid sudoku puzzle")
+            
+            #define structure for sudoku puzzle
             self.structure = []
-            for y in range(self.height):
+            for y in range(9):
                 row = []
-                for x in range(self.width):
+                for x in range(9):
                     if contents[y][x].isdigit():
                         row.append(contents[y][x])
                     else:
                         row.append(False)
                 self.structure.append(row)
 
+            
+
         # determine variables set
         self.variables = set()
-        for y in range(self.height):
-            for x in range(self.width):
+        for y in range(9):
+            for x in range(9):
                 self.variables.add(Variable(y, x))
 
         # determine initial assignment
@@ -194,28 +200,3 @@ class SudokuSolver():
                     return result
             self.domains = copy.deepcopy(tmp_domain)
         return None
-
-"""
-sudoku = Sudoku("structure0.txt")
-solver = SudokuSolver(sudoku)
-solver.print(solver.sudoku.initial_assignment)
-print()
-assignment = solver.solve()
-
-if assignment is None:
-    print("No solution")
-else:
-    solver.print(assignment)
-
-print(solver.counter)
-"""
-
-""" Now I am testing Git Version Control """
-
-
-
-
-
-
-
-
